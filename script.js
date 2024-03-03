@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
             itemDiv.classList.add('carrito-item');
             const subtotal = item.cantidad * item.precio;
             itemDiv.innerHTML = `
-                <p>${item.nombre} - Cantidad: ${item.cantidad} - Precio Unitario: $${item.precio} - Subtotal: $${subtotal}</p>
+                <p>${item.nombre} - Cantidad: ${item.cantidad} - Precio Unitario: $${item.precio} - Subtotal: $${subtotal.toFixed(2)}</p>
                 <button onclick="eliminarDelCarrito(${item.id})">Eliminar</button>
             `;
             carritoLista.appendChild(itemDiv);
@@ -85,6 +85,24 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarCarrito();
     }
 
+    // Función para generar la factura
+    function generarFactura() {
+        let facturaHTML = '<h2>Factura de Compra</h2>';
+        facturaHTML += '<table>';
+        facturaHTML += '<tr><th>Producto</th><th>Cantidad</th><th>Precio Unitario</th><th>Subtotal</th></tr>';
+
+        carrito.forEach(item => {
+            const subtotal = item.cantidad * item.precio;
+            facturaHTML += `<tr><td>${item.nombre}</td><td>${item.cantidad}</td><td>$${item.precio.toFixed(2)}</td><td>$${subtotal.toFixed(2)}</td></tr>`;
+        });
+
+        const total = carrito.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+        facturaHTML += `<tr><td colspan="3">Total</td><td>$${total.toFixed(2)}</td></tr>`;
+        facturaHTML += '</table>';
+
+        return facturaHTML;
+    }
+
     // Vaciar carrito de compras
     vaciarCarritoBtn.addEventListener('click', () => {
         carrito = [];
@@ -93,12 +111,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Confirmar compra
     confirmarCompraBtn.addEventListener('click', () => {
-        // Aquí podrías implementar la lógica para generar la factura
-        alert('Compra confirmada');
-        // Por ejemplo, podrías limpiar el carrito y recargar los productos disponibles
+        if (carrito.length === 0) {
+            alert('El carrito de compras está vacío. Por favor, agrega productos.');
+            return;
+        }
+
+        const factura = generarFactura();
+        // Mostrar la factura en pantalla
+        const facturaContainer = document.createElement('div');
+        facturaContainer.classList.add('factura-container');
+        facturaContainer.innerHTML = factura;
+        document.body.appendChild(facturaContainer);
+
+        // Limpiar el carrito después de confirmar la compra
         carrito = [];
         renderizarCarrito();
-        renderizarProductos();
     });
 
     // Inicializar la aplicación renderizando los productos disponibles
